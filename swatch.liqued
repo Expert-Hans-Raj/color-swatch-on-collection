@@ -1,0 +1,115 @@
+
+
+{% assign file_extension = 'png' %}
+
+
+
+{% assign found_option = false %}
+{% assign is_color = false %}
+{% assign option_index = 0 %}
+
+{% for option in product.options %}
+  {% if option == swatch %}
+    {% assign found_option = true %}
+    {% assign option_index = forloop.index0 %}
+    <style>
+      label[for="product-select-option-{{ option_index }}"] { display: none; }
+      #product-select-option-{{ option_index }} { display: none; }
+      #product-select-option-{{ option_index }} + .custom-style-select-box { display: none !important; }
+    </style>
+    <script>$(window).load(function() { $('.selector-wrapper:eq({{ option_index }})').hide(); });</script>
+    {% assign downcased_option = swatch | downcase %}
+    {% if downcased_option contains 'color' or downcased_option contains 'colour' %}
+      {% assign is_color = true %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+
+
+<div class="custom_swatch swatch clearfix" data-option-index="{{ option_index }}">
+  <div class="header">{{ swatch }}</div>
+  {% assign values = '' %}
+  {% for variant in product.variants %}
+    {% assign value = variant.options[option_index] %}
+    {% unless values contains value %}
+      {% assign values = values | join: ',' %}
+      {% assign values = values | append: ',' | append: value %} 
+      {% assign values = values | split: ',' %}
+      <div data-value="{{ value | escape }}" class="swatch-element {% if is_color %}color {% endif %}{{ value | handle }} {% if variant.available %}available{% else %}soldout{% endif %}">
+        {% if is_color %}
+        <div class="tooltip">{{ value }}</div>
+        {% endif %}
+        <input id="swatch-{{ option_index }}-{{ value | handle }}" type="radio" name="option-{{ option_index }}" value="{{ value | escape }}"{% if forloop.first %} checked{% endif %} {% unless variant.available %}disabled{% endunless %} />
+        {% if is_color %}
+        <label  or="swatch-{{ option_index }}-{{ value | handle }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: url({{ value | handle | append: '.' | append: file_extension | asset_url }})">
+          <img class="crossed-out" src="{{ 'soldout.png' | asset_url }}" />
+        </label>
+        {% else %}
+        <label class="swatches__form--label" variant-color={{ value | handle }} variant-id="{{ variant.id }}" style="background-color: {{ value | split: ' ' | last | handle }}; background-image: {{ value | handle | append: '.' | append: file_extension | file_url }}" data-img="{{ variant.image.src | img_url : "original" }}" for="swatch-{{ option_index }}-{{ value | handle }}">
+       {% comment %}   {{ value }} {% endcomment %}
+        
+        </label>
+        {% endif %}
+      </div>
+    {% endunless %}
+    {% if variant.available %}
+    <script>
+      jQuery('.swatch[data-option-index="{{ option_index }}"] .{{ value | handle }}').removeClass('soldout').addClass('available').find(':radio').removeAttr('disabled');
+    </script>
+    {% endif %}
+  {% endfor %}
+</div>
+
+
+<script>
+
+/* Disclaimer */ 
+ $(document).ready(function() {
+    $('body').on('click', '[name="checkout"], [name="goto_pp"], [name="goto_gc"]', function() {
+      if ($('#agree').is(':checked')) {
+        $(this).submit();
+      }
+      else {
+        alert("You must agree with the terms and conditions of sales to check out.");
+        return false;
+      }
+    });
+  });
+/* Disclaimer */ 
+
+ /* Change Product Image */
+
+ $(document).ready(function(){
+ $(".chnage_variantimg .swatches__form--label").click(function(){
+   var variants_image = $(this).attr("data-img");
+ console.log('dfdf');   if (variants_image != 'undefined'){
+     var image_variant = $(this).parents('.featured__collection-product').find('.pro_main_img').html('<img src='+variants_image+'>');      
+   }
+ 
+  });
+   
+   
+    setTimeout(function() { 
+   
+     $(".chnage_variantimg .swatches__form--label").click(function(){
+      console.log('sddsd');
+   var variants_image = $(this).attr("data-img");
+      console.log('variants_image', variants_image);
+     var image_variant = $(this).parents('.custom-swatch').find('.box-ratio').html('<img src='+variants_image+'>');      
+   console.log(image_variant);
+ 
+  });
+          }, 2000);
+
+   $(".chnage_variantimg .swatches__form--label").click(function(){
+      console.log('sddsd');
+   var variants_image = $(this).attr("data-img");
+      console.log('variants_image', variants_image);
+     var image_variant = $(this).parents('.custom-swatch').find('.box-ratio').html('<img src='+variants_image+'>');      
+   console.log(image_variant);
+ 
+  });
+   
+});
+</script>
+
